@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/2.2.2/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.4/js/dataTables.responsive.min.js"></script>
+    <link href='https://cdn.datatables.net/2.2.2/css/dataTables.dataTables.min.css' rel='stylesheet' />
+    <link href='https://cdn.datatables.net/responsive/3.0.4/css/responsive.dataTables.min.css' rel='stylesheet' />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  </head>
+
+<style>
+body {
+  font-family: "Open Sans", sans-serif;
+  font-weight: 300;
+  line-height: 1.2;
+  font-size: 14px;
+} 
+table {
+  width: 100%;
+}
+
+/* Style for tags in "Categories" column */
+.tag {
+    display: inline-block;
+    background-color: #CDE8A4; /* Medium-light green background for tags */
+    color: #6FA800; /* Medium green text color */
+    padding: 2px 6px;
+    margin: 2px;
+    border-radius: 4px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.tag:hover {
+    background-color: #B5D98C; /* Slightly darker green on hover */
+    cursor: pointer;
+}
+
+/* Style for filter dropdowns */
+label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+select {
+    padding: 4px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+/* Style for filter container to align filters side by side on desktop */
+.filter-container {
+    display: flex;
+    gap: 10px; /* Space between filters on desktop */
+    margin-bottom: 0px;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+.filter-container label {
+    margin-right: 0px;
+    font-weight: bold;
+}
+
+.filter-container select {
+    padding: 0px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+
+/* Stack filters vertically on mobile screens */
+@media (max-width: 768px) {
+    body {
+        line-height: 1.2;
+        font-size: 13px;
+        } 
+    .filter-container {
+        flex-direction: column; /* Stack filters on mobile */
+        align-items: flex-start; /* Align labels and selects to the left */
+        gap: 5px; /* Reduced gap for stacked filters */
+    }
+
+    .filter-container select {
+        width: 100%; /* Make dropdowns full-width on mobile */
+    }
+}
+
+</style>
+</head>
+<body>
+  <div class="filter-container">
+    <label for="stateFilter">Filter by state:</label>
+    <select id="stateFilter">
+        <option value="">All</option>
+    </select>
+
+    <label for="labelFilter">Filter by municipality:</label>
+    <select id="muniFilter">
+        <option value="">All</option>
+    </select>
+
+    <label for="labelFilter">Filter by type:</label>
+    <select id="typeFilter">
+        <option value="">All</option>
+    </select>
+
+    <label for="labelFilter">Filter by school offering early childhood education:</label>
+    <select id="schoolFilter">
+        <option value="">All</option>
+    </select>
+
+    <label for="labelFilter">Filter by cação/anjo?:</label>
+    <select id="meatFilter">
+        <option value="">All</option>
+    </select>
+</div>
+  <table id="dataTable" class="display">
+      <thead>
+          <tr id="tableHead"></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+  </table>
+
+  <script>
+    $(document).ready(function () {
+        const csvUrl = 'data.csv';
+
+        Papa.parse(csvUrl, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function (results) {
+                const data = results.data;
+                if (data.length > 0) {
+                    // Create table headers dynamically
+                    const headers = Object.keys(data[0]).filter(header => header.trim() !== "");
+                    headers.forEach(header => {
+                        $('#tableHead').append(`<th>${header}</th>`);
+                    });
+
+                    // Create table rows dynamically
+                    data.forEach(row => {
+                        let rowHtml = '<tr>';
+                        headers.forEach(header => {
+                            if (header === "Categories" && row[header]) {
+                                // Replace semicolons with styled tags
+                                const tags = row[header].split(';').map(tag => `<span class="tag">${tag.trim()}</span>`).join(' ');
+                                rowHtml += `<td>${tags}</td>`;
+                            } else {
+                                rowHtml += `<td>${row[header] || ''}</td>`;
+                            }
+                        });
+                        rowHtml += '</tr>';
+                        $('#tableBody').append(rowHtml);
+                    });
+
+                    // Initialize Datatables
+                    const table = $('#dataTable').DataTable({
+                        responsive: {
+                            details: {
+                                type: 'inline',
+                                renderer: function (api, rowIdx, columns) {
+                                    let data = $.map(columns, function (col, i) {
+                                        if (col.hidden) {
+                                            return '<tr data-dt-row="' + col.rowIndex + '" data-dt-column="' + col.columnIndex + '">' +
+                                                '<td><strong>' + col.title + ':</strong></td> ' +
+                                                '<td>' + col.data + '</td>' +
+                                                '</tr>';
+                                        }
+                                        return '';
+                                    }).join('');
+                                    return data ? $('<table/>').append(data) : false;
+                                }
+                            }
+                        },
+                        columnDefs: [
+                            { responsivePriority: 1, targets: 0 },
+                            { responsivePriority: 2, targets: 1 },
+                            { responsivePriority: 3, targets: 2 },
+                            { responsivePriority: 4, targets: 3 },
+                            { responsivePriority: 5, targets: 5 },
+                            { responsivePriority: 6, targets: 4 },
+                            { responsivePriority: 7, targets: 6 }
+                        ]
+                    });
+
+                    // Populate the State filter dropdown with unique values
+                    const uniqueStates = [...new Set(data.map(row => row['State']))].sort();
+                    uniqueStates.forEach(state => {
+                        $('#stateFilter').append(`<option value="${state}">${state}</option>`);
+                    });
+                    // Filter table based on State selection
+                    $('#stateFilter').on('change', function () {
+                        const selectedState = $(this).val();
+                        if (selectedState) {
+                            table.column(headers.indexOf("State")).search('^' + selectedState + '$', true, false).draw();
+                        } else {
+                            table.column(headers.indexOf("State")).search('').draw();
+                        }
+                    });
+
+
+                    // Helper to populate a dropdown and enable filtering
+                    function setupFilterDropdown(selectId, columnName) {
+                        const uniqueItems = [...new Set(data.map(row => row[columnName]))].filter(Boolean).sort();
+                        uniqueItems.forEach(item => {
+                            $(`#${selectId}`).append(`<option value="${item}">${item}</option>`);
+                        });
+
+                        $(`#${selectId}`).on('change', function () {
+                            const selected = $(this).val();
+                            const colIndex = headers.indexOf(columnName);
+                            if (selected) {
+                                table.column(colIndex).search('^' + selected + '$', true, false).draw();
+                            } else {
+                                table.column(colIndex).search('').draw();
+                            }
+                        });
+                    }
+
+                    // Populate and enable all filters
+                    setupFilterDropdown("stateFilter", "State");
+                    setupFilterDropdown("muniFilter", "Municipality");
+                    setupFilterDropdown("typeFilter", "Type");
+                    setupFilterDropdown("schoolFilter", "School offering early childhood education");
+                    setupFilterDropdown("meatFilter", "Cação or anjo?");
+
+
+
+
+
+
+                } else {
+                    console.error('No data found!');
+                }
+            },
+            error: function (error) {
+                console.error('Error fetching data:', error);
+            }
+        });
+    });
+</script>
+</body>
+</html>
