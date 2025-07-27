@@ -97,27 +97,27 @@ table {
   <div class="filter-container">
   <div class="filter-group">
     <label for="stateFilter">Filter by state:</label>
-    <select id="stateFilter"><option value="">All</option></select>
+    <select id="stateFilter"><option value="">Todos</option></select>
   </div>
 
   <div class="filter-group">
     <label for="muniFilter">Filter by municipality:</label>
-    <select id="muniFilter"><option value="">All</option></select>
+    <select id="muniFilter"><option value="">Todos</option></select>
   </div>
 
   <div class="filter-group">
     <label for="typeFilter">Filter by type:</label>
-    <select id="typeFilter"><option value="">All</option></select>
+    <select id="typeFilter"><option value="">Todos</option></select>
   </div>
 
   <div class="filter-group">
     <label for="schoolFilter">Filter by school offering early childhood education:</label>
-    <select id="schoolFilter"><option value="">All</option></select>
+    <select id="schoolFilter"><option value="">Todos</option></select>
   </div>
 
   <div class="filter-group">
     <label for="meatFilter">Filter by cação/anjo:</label>
-    <select id="meatFilter"><option value="">All</option></select>
+    <select id="meatFilter"><option value="">Todos</option></select>
   </div>
 </div>
   <table id="dataTable" class="display">
@@ -129,7 +129,7 @@ table {
 
   <script>
     $(document).ready(function () {
-        const csvUrl = 'data.csv';
+        const csvUrl = 'data_pt.csv';
 
         Papa.parse(csvUrl, {
             download: true,
@@ -180,7 +180,7 @@ table {
                             }
                         },
 
-                        
+                         language: {url: "https://cdn.datatables.net/plug-ins/2.0.0/i18n/pt-BR.json"},
                         columnDefs: [
                             { responsivePriority: 1, targets: 0 },
                             { responsivePriority: 2, targets: 1 },
@@ -225,7 +225,7 @@ table {
                                 .filter(Boolean)
                                 .sort();
 
-                            const optionsHtml = ['<option value="">All</option>'];
+                            const optionsHtml = ['<option value="">Todos</option>'];
                             uniqueValues.forEach(val => {
                                 optionsHtml.push(`<option value="${val}">${val}</option>`);
                             });
@@ -245,10 +245,10 @@ table {
 
 
                     const allFilters = [
-                        ["stateFilter", "State"],
-                        ["muniFilter", "Municipality"],
-                        ["typeFilter", "Type"],
-                        ["schoolFilter", "Early childhood education"],
+                        ["stateFilter", "Estado"],
+                        ["muniFilter", "Município"],
+                        ["typeFilter", "Tipo"],
+                        ["schoolFilter", "Educação infantil"],
                         ["meatFilter", "Cação/anjo"]
                     ];
 
