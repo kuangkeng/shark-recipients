@@ -85,7 +85,10 @@ table {
     .filter-container {
         gap: 10px; /* row-gap, column-gap */
         grid-template-columns: 1fr;
-  }
+    }
+    div.dt-container div.dt-layout-row:not(.dt-layout-table) {
+        display: flex !important;
+    }
 }
 
 </style>
@@ -225,7 +228,7 @@ table {
                     setupFilterDropdown("stateFilter", "State");
                     setupFilterDropdown("muniFilter", "Municipality");
                     setupFilterDropdown("typeFilter", "Type");
-                    setupFilterDropdown("schoolFilter", "School offering early childhood education");
+                    setupFilterDropdown("schoolFilter", "Early childhood education");
                     setupFilterDropdown("meatFilter", "Cação or anjo?");
 
 
